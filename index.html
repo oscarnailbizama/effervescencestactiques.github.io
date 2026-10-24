@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>effervescences tactiques</title>
+    <link rel="icon" href="logo.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Text:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Stack Sans Text', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            cursor: crosshair;
+        }
+
+        header {
+            padding: 2% 2%;
+            text-align: left;
+        }
+
+        h1,h2 {
+            font-size: 7vh;
+            font-weight: 300;
+            margin: 0;
+            display: inline-block;
+        }
+
+        #toggleInfo {
+            font-size: 3vh;
+            color: #55ff00;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        #infoContent {
+            display: none;
+            margin-top: 2%;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        #infoContent h2, #infoContent h3 {
+            font-weight: 100;
+            font-size: 3vh;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        nav {
+            padding: 0% 2%;
+            flex: 1;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        a {
+            text-decoration: none;
+            color: #fff;
+            font-size: 3vh;
+            font-weight: 50;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #55ff00;
+        }
+
+        footer {
+            padding: 2%;
+            font-size: 2vh;
+            color: #999;
+        }
+
+        @media (max-width: 600px) {
+            h1,h2 { font-size: 36px; }
+            #infoContent h2, #infoContent h3 { font-size: 16px; }
+            a { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>effervescences_tactiques_workshop.archive</h1>
+        <span id="toggleInfo">+</span><br>
+        <h2 style="color: #55ff00;">Oscar Nail Bizama</h2>
+        <div id="infoContent">
+            <h2>This site serves as a personal archive documenting my exploration and progress in HTML, CSS, and&nbsp;JavaScript throughout the first year of my Master’s in Visual Knowledge at HEAD&nbsp;–&nbsp;Genève.
+            </h2>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="week1/index.html">Modèles_IA</a></li>
+            <li><a href="https://oscarnailbizama.me" target="_blank">Portfolio</a></li>
+            <li><a href="workshop/index.html" target="_blank">From Social to Curated</a> with
+                <a href="https://lab.tiborudvari.com/students/clement.bonnard/index0.html" target="_blank" style="color: #55ff00; text-decoration: none;">Clément Bonnard</a>
+            </li>
+            <li><a href="https://lab.tiborudvari.com/students/clement.bonnard/site/week7/index.html" target="_blank">Stades de France</a> with
+                <a href="https://lab.tiborudvari.com/students/clement.bonnard/index0.html" target="_blank" style="color: #55ff00; text-decoration: none;">Clément Bonnard</a>
+            </li>
+            <li><a href="https://lab.tiborudvari.com/students/auriane.locatelli/mobilite/index.html" target="_blank">Mobilité</a> with
+                <a href="https://aurianelocatelli.ch/" target="_blank" style="color: #55ff00; text-decoration: none;">Auriane Locatelli</a>
+            </li><a href="article/index.html">Pingüino de Humbolt</a></li>
+            <li><a href="D3/loyers.html" target="_blank">Hausse des Loyers en Suisse</a> with
+                <a href="https://lab.tiborudvari.com/students/clement.bonnard/index0.html" target="_blank" style="color: #55ff00; text-decoration: none;">Clément Bonnard</a>
+        </ul>
+    </nav>
+
+    <footer>© 2025 OSCAR NAIL BIZAMA</footer>
+
+    <script>
+        document.getElementById('toggleInfo').addEventListener('click', () => {
+            const infoContent = document.getElementById('infoContent');
+            const isVisible = infoContent.style.display === 'block';
+
+            if (isVisible) {
+                infoContent.style.opacity = '0';
+                setTimeout(() => infoContent.style.display = 'none', 500);
+            } else {
+                infoContent.style.display = 'block';
+                setTimeout(() => infoContent.style.opacity = '1', 10);
+            }
+        });
+    </script>
+</body>
+</html>
