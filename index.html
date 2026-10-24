@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,125 +9,302 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Text:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --green: #55ff00;
+            --shadow: 0 0 12px rgba(0, 0, 0, 0.75);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
+        }
+
         body {
             font-family: 'Stack Sans Text', 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
+            line-height: 1.3;
             margin: 0;
             padding: 0;
             background-color: #000;
             color: #fff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
             cursor: crosshair;
+            overflow: hidden;
+            position: relative;
         }
 
+        /* ---------- Fond (video / image) ---------- */
+        #bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            pointer-events: none;
+        }
+
+        #bg.on { opacity: 1; }
+
+        #bg video, #bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* ---------- Titre ---------- */
         header {
-            padding: 2% 2%;
-            text-align: left;
+            position: relative;
+            z-index: 2;
+            padding: 2% 2% 0;
+            text-align: center;
+            text-shadow: var(--shadow);
         }
 
-        h1,h2 {
+        h1, .name {
             font-size: 7vh;
             font-weight: 300;
+            line-height: 1.05;
             margin: 0;
-            display: inline-block;
         }
 
+        h1 span { display: block; }
+
         #toggleInfo {
-            font-size: 3vh;
-            color: #55ff00;
+            display: block;
+            margin: 0 auto;
+            padding: 0;
+            background: none;
+            border: 0;
+            font: inherit;
+            font-size: 7vh;
+            font-weight: 300;
+            line-height: 1.05;
+            color: var(--green);
             cursor: pointer;
-            margin-left: 10px;
+            text-shadow: inherit;
         }
 
         #infoContent {
             display: none;
-            margin-top: 2%;
             opacity: 0;
-            transition: opacity 1s ease;
+            transition: opacity 0.8s ease;
+            max-width: 62ch;
+            margin: 1vh auto 1.5vh;
+            font-size: 1.9vh;
+            font-weight: 300;
+            line-height: 1.5;
         }
 
-        #infoContent h2, #infoContent h3 {
-            font-weight: 100;
-            font-size: 3vh;
-            letter-spacing: 0.5px;
-            margin: 0;
+        .name {
+            color: var(--green);
         }
 
+        /* ---------- Items 01 / 02 / 03 ---------- */
         nav {
-            padding: 0% 2%;
-            flex: 1;
-            display: flex;
-            justify-content: flex-start;
-            align-items: flex-start;
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
         }
 
-        ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        a {
-            text-decoration: none;
-            color: #fff;
+        nav button {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+            background: none;
+            border: 0;
+            padding: 1vh 2vh;
+            font-family: inherit;
             font-size: 3vh;
-            font-weight: 50;
+            font-weight: 300;
+            color: #fff;
+            cursor: pointer;
+            text-shadow: var(--shadow);
             transition: color 0.3s;
         }
 
-        a:hover {
-            color: #55ff00;
+        /* centres des quarts 2/4, 3/4 et 4/4 de la largeur */
+        nav button:nth-child(1) { left: 37.5%; }
+        nav button:nth-child(2) { left: 62.5%; }
+        nav button:nth-child(3) { left: 87.5%; }
+
+        nav button:hover,
+        nav button.active { color: var(--green); }
+
+        nav button:focus-visible,
+        #toggleInfo:focus-visible {
+            outline: 1px solid var(--green);
+            outline-offset: 4px;
+        }
+
+        /* ---------- Texte defilant ---------- */
+        #ticker {
+            position: fixed;
+            left: 0;
+            top: 68%;
+            z-index: 1;
+            white-space: nowrap;
+            font-size: 3vh;
+            font-weight: 300;
+            color: var(--green);
+            text-shadow: var(--shadow);
+            pointer-events: none;
+            display: none;
+            will-change: transform;
         }
 
         footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
             padding: 2%;
             font-size: 2vh;
             color: #999;
+            text-align: center;
+            text-shadow: var(--shadow);
         }
 
         @media (max-width: 600px) {
-            h1,h2 { font-size: 36px; }
-            #infoContent h2, #infoContent h3 { font-size: 16px; }
-            a { font-size: 16px; }
+            h1, .name, #toggleInfo { font-size: 36px; }
+            #infoContent { font-size: 13px; }
+            nav button, #ticker { font-size: 16px; }
         }
     </style>
 </head>
 <body>
+    <div id="bg" aria-hidden="true"></div>
+
     <header>
-        <h1>effervescences_tactiques_workshop.archive</h1>
-        <span id="toggleInfo">+</span><br>
-        <h2 style="color: #55ff00;">Oscar Nail Bizama</h2>
+        <h1>
+            <span>effervescences</span>
+            <span>tactiques</span>
+        </h1>
+        <button id="toggleInfo" type="button" aria-expanded="false" aria-controls="infoContent">+</button>
         <div id="infoContent">
-            <h2>This site serves as a personal archive documenting my exploration and progress in HTML, CSS, and&nbsp;JavaScript throughout the first year of my Master’s in Visual Knowledge at HEAD&nbsp;–&nbsp;Genève.
-            </h2>
+            Ce site archive la sélection des exercices et projets réalisés lors du workshop effervescences tactiques avec <a href="https://saulpandelakis.com/" target="_blank" rel="noopener" style="color: var(--green); text-decoration: none;">saul pandelakis</a>, Visual Knowledge à la HEAD&nbsp;–&nbsp;Genève. Texte provisoire à remplacer : chaque exercice explore une manière différente de produire, d'assembler et de faire circuler des images, des sons et des gestes, en travaillant par tentatives successives, par détournements et par effets de bruit.
         </div>
+        <div class="name">oscar nail bizama</div>
     </header>
 
     <nav>
-        <ul>
-            <li><a href="week1/index.html">modèles_ia</a></li>
-            <li><a href="https://oscarnailbizama.me" target="_blank">trombinoscope_des_théoricien·nes</a></li>
-            <li><a href="workshop/index.html" target="_blank">performance</a></li>
-            <li><a href="https://lab.tiborudvari.com/students/clement.bonnard/site/week7/index.html" target="_blank">uchronie</a></li>
-        </ul>
+        <button type="button" data-index="0">01</button>
+        <button type="button" data-index="1">02</button>
+        <button type="button" data-index="2">03</button>
     </nav>
+
+    <div id="ticker"></div>
 
     <footer>© 2026 OSCAR NAIL BIZAMA</footer>
 
     <script>
-        document.getElementById('toggleInfo').addEventListener('click', () => {
-            const infoContent = document.getElementById('infoContent');
-            const isVisible = infoContent.style.display === 'block';
+        /* ============ CONFIGURATION ============
+           Remplace les fichiers (video .mp4/.webm ou image) et les textes. */
+        const ITEMS = [
+            { src: '01.mp4', text: 'Texte provisoire de l’exercice 01 — remplace-le par ta description, en une seule ligne qui traverse l’écran.' },
+            { src: '02.mp4', text: 'Texte provisoire de l’exercice 02 — remplace-le par ta description, en une seule ligne qui traverse l’écran.' },
+            { src: '03.mp4', text: 'Texte provisoire de l’exercice 03 — remplace-le par ta description, en une seule ligne qui traverse l’écran.' }
+        ];
+        const TICKER_SPEED = 120;   // pixels par seconde
+        const TICKER_PAUSE = 5000;  // ms d'attente avant de relancer le texte
 
-            if (isVisible) {
-                infoContent.style.opacity = '0';
-                setTimeout(() => infoContent.style.display = 'none', 500);
+        /* ============ Bouton + / - ============ */
+        const toggle = document.getElementById('toggleInfo');
+        const info = document.getElementById('infoContent');
+        let infoTimer;
+
+        toggle.addEventListener('click', () => {
+            const opening = toggle.textContent === '+';
+            clearTimeout(infoTimer);
+            toggle.textContent = opening ? '-' : '+';
+            toggle.setAttribute('aria-expanded', String(opening));
+
+            if (opening) {
+                info.style.display = 'block';
+                infoTimer = setTimeout(() => info.style.opacity = '1', 10);
             } else {
-                infoContent.style.display = 'block';
-                setTimeout(() => infoContent.style.opacity = '1', 10);
+                info.style.opacity = '0';
+                infoTimer = setTimeout(() => info.style.display = 'none', 800);
             }
+        });
+
+        /* ============ Fond + texte defilant ============ */
+        const bg = document.getElementById('bg');
+        const ticker = document.getElementById('ticker');
+        const buttons = [...document.querySelectorAll('nav button')];
+        let current = -1;
+        let anim = null;
+        let tickerTimer = null;
+
+        function stopTicker() {
+            clearTimeout(tickerTimer);
+            if (anim) { anim.cancel(); anim = null; }
+            ticker.style.display = 'none';
+        }
+
+        function startTicker(text) {
+            stopTicker();
+            ticker.textContent = text;
+            ticker.style.display = 'block';
+
+            const run = () => {
+                const w = ticker.offsetWidth;
+                const from = window.innerWidth;          // entre par la droite
+                const to = -w;                           // sort par la gauche
+                const duration = ((from - to) / TICKER_SPEED) * 1000;
+                anim = ticker.animate(
+                    [{ transform: `translateX(${from}px)` }, { transform: `translateX(${to}px)` }],
+                    { duration, easing: 'linear', fill: 'both' }
+                );
+                anim.onfinish = () => { tickerTimer = setTimeout(run, TICKER_PAUSE); };
+            };
+            run();
+        }
+
+        function showBackground(src) {
+            const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(src);
+            let el;
+            if (isVideo) {
+                el = document.createElement('video');
+                el.src = src;
+                el.autoplay = true;
+                el.loop = true;
+                el.muted = true;
+                el.playsInline = true;
+                el.setAttribute('muted', '');
+                el.play().catch(() => {});
+            } else {
+                el = document.createElement('img');
+                el.src = src;
+                el.alt = '';
+            }
+            bg.replaceChildren(el);
+            bg.classList.add('on');
+        }
+
+        function clearBackground() {
+            bg.classList.remove('on');
+            setTimeout(() => { if (current === -1) bg.replaceChildren(); }, 600);
+        }
+
+        buttons.forEach((btn, i) => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => b.classList.remove('active'));
+
+                if (current === i) {            // second clic : retour au noir
+                    current = -1;
+                    clearBackground();
+                    stopTicker();
+                    return;
+                }
+
+                current = i;
+                btn.classList.add('active');
+                showBackground(ITEMS[i].src);
+                startTicker(ITEMS[i].text);
+            });
         });
     </script>
 </body>
