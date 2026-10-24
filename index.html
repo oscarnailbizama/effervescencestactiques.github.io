@@ -32,7 +32,6 @@
             position: relative;
         }
 
-        /* ---------- Fond (video / image) ---------- */
         #bg {
             position: fixed;
             inset: 0;
@@ -51,7 +50,6 @@
             display: block;
         }
 
-        /* ---------- Titre ---------- */
         header {
             position: relative;
             z-index: 2;
@@ -99,7 +97,6 @@
             color: var(--green);
         }
 
-        /* ---------- Items 01 / 02 / 03 ---------- */
         nav {
             position: fixed;
             inset: 0;
@@ -124,7 +121,6 @@
             transition: color 0.3s;
         }
 
-        /* centre de chacun des 3 tiers de la largeur */
         nav button:nth-child(1) { left: calc(100% / 6); }
         nav button:nth-child(2) { left: 50%; }
         nav button:nth-child(3) { left: calc(100% * 5 / 6); }
@@ -138,7 +134,33 @@
             outline-offset: 4px;
         }
 
-        /* ---------- Texte defilant ---------- */
+        .pdf-scroll {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            filter: brightness(0.8);
+        }
+
+        .pdf-scroll.ready { opacity: 1; }
+
+        .pdf-track {
+            width: min(80vw, 720px);
+            margin: 0 auto;
+            will-change: transform;
+        }
+
+        .pdf-set { display: flow-root; }
+
+        .pdf-set canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            margin-bottom: 4vh;
+            background: #fff;
+        }
+
         #ticker {
             position: fixed;
             left: 0;
@@ -162,7 +184,7 @@
             z-index: 1;
             padding: 2%;
             font-size: 2vh;
-            color: #999;
+            color: #ffffff;
             text-align: center;
             text-shadow: var(--shadow);
         }
@@ -186,7 +208,7 @@
         <div id="infoContent">
             Ce site archive la sélection des exercices et projets réalisés lors du workshop effervescences tactiques avec <a href="https://saulpandelakis.com/" target="_blank" rel="noopener" style="color: var(--green); text-decoration: none;">saul pandelakis</a>, Visual Knowledge à la HEAD&nbsp;–&nbsp;Genève. Texte provisoire à remplacer : chaque exercice explore une manière différente de produire, d'assembler et de faire circuler des images, des sons et des gestes, en travaillant par tentatives successives, par détournements et par effets de bruit.
         </div>
-        <div class="name">oscar nail bizama</div>
+        <div class="name">documents d'identité</div>
     </header>
 
     <nav>
@@ -197,20 +219,24 @@
 
     <div id="ticker"></div>
 
-    <footer>© 2026 OSCAR NAIL BIZAMA</footer>
+    <footer>© 2026, oscar nail bizama</footer>
 
     <script>
-        /* ============ CONFIGURATION ============
-           Remplace les fichiers (video .mp4/.webm ou image) et les textes. */
+
         const ITEMS = [
-            { src: '01.mp4', text: 'Texte provisoire de l’exercice 01 — remplace-le par ta description, en une seule ligne qui traverse l’écran.' },
+
+            { pdfs: ['01.pdf', '02.pdf', '03.pdf', '04.pdf', '05.pdf', '06.pdf', '07.pdf', 'pdf08.pdf', '09.pdf', '10.pdf'], text: 'Texte provisoire de l’exercice 01 — remplace-le par ta description, en une seule ligne qui traverse l’écran.' },
             { src: 'v02.webm', text: 'Archive des portraits des théoricien·nes ou experts dans la matière liée aux documents d’identité important·es pour ma recherche.' },
             { src: '03.mp4', text: 'Texte provisoire de l’exercice 03 — remplace-le par ta description, en une seule ligne qui traverse l’écran.' }
         ];
         const TICKER_SPEED = 120;   // pixels par seconde
         const TICKER_PAUSE = 5000;  // ms d'attente avant de relancer le texte
+        const PDF_SPEED = 80;       // pixels par seconde pour le defilement des PDF
+        const PDF_MAX_PAGES = 30;   // pages maximum lues par PDF
+        const PDF_JS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+        const PDF_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        /* ============ Bouton + / - ============ */
+
         const toggle = document.getElementById('toggleInfo');
         const info = document.getElementById('infoContent');
         let infoTimer;
@@ -230,7 +256,7 @@
             }
         });
 
-        /* ============ Fond + texte defilant ============ */
+
         const bg = document.getElementById('bg');
         const ticker = document.getElementById('ticker');
         const buttons = [...document.querySelectorAll('nav button')];
@@ -263,7 +289,14 @@
             run();
         }
 
-        function showBackground(src) {
+        function showBackground(item) {
+            stopPdf();
+            if (item.pdfs) {
+                bg.classList.add('on');
+                showPdfBackground(item.pdfs);
+                return;
+            }
+            const src = item.src;
             const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(src);
             let el;
             if (isVideo) {
@@ -284,9 +317,108 @@
             bg.classList.add('on');
         }
 
+        let pdfToken = 0;
+        let pdfRaf = null;
+        let pdfLibPromise = null;
+
+        function loadPdfJs() {
+            if (!pdfLibPromise) {
+                pdfLibPromise = new Promise((resolve, reject) => {
+                    const s = document.createElement('script');
+                    s.src = PDF_JS;
+                    s.onload = () => {
+                        window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER;
+                        resolve(window.pdfjsLib);
+                    };
+                    s.onerror = () => { pdfLibPromise = null; reject(new Error('pdf.js')); };
+                    document.head.appendChild(s);
+                });
+            }
+            return pdfLibPromise;
+        }
+
+        function stopPdf() {
+            pdfToken++;
+            if (pdfRaf) { cancelAnimationFrame(pdfRaf); pdfRaf = null; }
+        }
+
+        async function showPdfBackground(urls) {
+            const token = ++pdfToken;
+            const wrap = document.createElement('div');
+            wrap.className = 'pdf-scroll';
+            const track = document.createElement('div');
+            track.className = 'pdf-track';
+            const set = document.createElement('div');
+            set.className = 'pdf-set';
+            track.appendChild(set);
+            wrap.appendChild(track);
+            bg.replaceChildren(wrap);
+
+            let lib;
+            try { lib = await loadPdfJs(); } catch (e) { console.warn(e); return; }
+
+            const ratio = Math.min(window.devicePixelRatio || 1, 2);
+            const cssWidth = Math.min(window.innerWidth * 0.8, 720);
+
+            for (const url of urls) {
+                if (token !== pdfToken) return;
+                try {
+                    const doc = await lib.getDocument(url).promise;
+                    const n = Math.min(doc.numPages, PDF_MAX_PAGES);
+                    for (let p = 1; p <= n; p++) {
+                        if (token !== pdfToken) return;
+                        const page = await doc.getPage(p);
+                        const base = page.getViewport({ scale: 1 });
+                        const vp = page.getViewport({ scale: (cssWidth * ratio) / base.width });
+                        const canvas = document.createElement('canvas');
+                        canvas.width = vp.width;
+                        canvas.height = vp.height;
+                        await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+                        set.appendChild(canvas);
+                    }
+                } catch (e) {
+                    console.warn('PDF non lisible :', url, e);
+                }
+            }
+            if (token !== pdfToken || !set.children.length) return;
+
+
+            const h = set.offsetHeight;
+            const copies = 1 + Math.ceil(window.innerHeight / h);
+            for (let c = 0; c < copies; c++) {
+                const clone = set.cloneNode(false);
+                set.querySelectorAll('canvas').forEach(src => {
+                    const dst = document.createElement('canvas');
+                    dst.width = src.width;
+                    dst.height = src.height;
+                    dst.getContext('2d').drawImage(src, 0, 0);
+                    clone.appendChild(dst);
+                });
+                track.appendChild(clone);
+            }
+
+            wrap.classList.add('ready');
+            let y = 0;
+            let last = null;
+            const frame = (t) => {
+                if (token !== pdfToken) return;
+                if (last !== null) {
+                    y -= (PDF_SPEED * (t - last)) / 1000;
+                    const setH = set.offsetHeight;
+                    if (-y >= setH) y += setH;
+                    track.style.transform = `translate3d(0, ${y}px, 0)`;
+                }
+                last = t;
+                pdfRaf = requestAnimationFrame(frame);
+            };
+            pdfRaf = requestAnimationFrame(frame);
+        }
+
         function clearBackground() {
             bg.classList.remove('on');
-            setTimeout(() => { if (current === -1) bg.replaceChildren(); }, 600);
+            setTimeout(() => {
+                if (current === -1) { stopPdf(); bg.replaceChildren(); }
+            }, 600);
         }
 
         buttons.forEach((btn, i) => {
@@ -302,7 +434,7 @@
 
                 current = i;
                 btn.classList.add('active');
-                showBackground(ITEMS[i].src);
+                showBackground(ITEMS[i]);
                 startTicker(ITEMS[i].text);
             });
         });
