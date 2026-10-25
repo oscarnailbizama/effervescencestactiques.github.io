@@ -82,15 +82,25 @@
             text-shadow: inherit;
         }
 
+        /* Texte descriptif : juste sous les items 01 / 02 / 03 */
         #infoContent {
+            position: fixed;
+            top: 58%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 80ch;
+            max-height: 34vh;
+            overflow-y: auto;
+            z-index: 1;
             display: none;
             opacity: 0;
             transition: opacity 0.8s ease;
-            max-width: 62ch;
-            margin: 1vh auto 1.5vh;
+            text-align: center;
             font-size: 1.9vh;
             font-weight: 300;
             line-height: 1.5;
+            text-shadow: var(--shadow);
         }
 
         .name {
@@ -167,7 +177,7 @@
             left: 0;
             top: 62%;
             width: 100%;
-            z-index: 1;
+            z-index: 2;
             pointer-events: none;
             display: none;
         }
@@ -212,8 +222,6 @@
             <span>tactiques</span>
         </h1>
         <button id="toggleInfo" type="button" aria-expanded="false" aria-controls="infoContent">+</button>
-        <div id="infoContent">
-            exercices qui m'ont apporté un autre point de vue et m'ont mené à approfondir ma problématique et ma pratique de recherche autour des documents d'identité pour la rédaction de mon mémoire de master en design visual knowledge.</div>
         <div class="name">documents d'identité</div>
     </header>
 
@@ -222,6 +230,8 @@
         <button type="button" data-index="1">02</button>
         <button type="button" data-index="2">03</button>
     </nav>
+
+    <div id="infoContent">Archive des réalisations faites lors du séminaire du mémoire. Mon intérêt pour les objets d'identification s'est approfondi cette semaine. De nouvelles approches et la découverte d'outils de recherche m'ont permis de faire évoluer ma problématique. Initialement centrée sur l'État et le contrôle exercé envers la population à travers les données, statistiques et cadastres — avec le document d'identité comme objet nécessaire à ces directives — ma réflexion a changé de direction. Je m'intéresse désormais à l'amélioration de la standardisation des données dans les documents d'identité, ainsi qu'au rôle des sociétés, organisations et acteurs qui régulent et établissent les conventions de standardisation de ces objets. Il est essentiel d'éviter de se focaliser sur un seul aspect : sécurité, facilitation de lecture et manipulation, standardisation des données ne doivent pas primer sur l'individu.</div>
 
     <div id="ticker"></div>
 
@@ -244,10 +254,10 @@
             { src: 'v02.webm', text: 'Archive des portraits des théoricien·nes ou experts dans la matière liée aux documents d’identité important·es pour ma recherche.' },
             { src: '03.mp4', text: 'Texte provisoire de l’exercice 03 — remplace-le par ta description, en une seule ligne qui traverse l’écran.' }
         ];
-        const TICKER_SPEED = 120;     // pixels par seconde
-        const TICKER_PAUSE = 5000;    // ms d'attente avant de relancer une ligne
-        const TICKER_STAGGER = 3000;  // ms entre le depart de chaque ligne
-        const PDF_SPEED = 80;       // pixels par seconde pour le defilement des PDF
+        const TICKER_SPEED = 100;     // pixels par seconde
+        const TICKER_PAUSE = 7000;    // ms d'attente avant de relancer une ligne
+        const TICKER_STAGGER = 0;  // ms entre le depart de chaque ligne
+        const PDF_SPEED = 100;       // pixels par seconde pour le defilement des PDF
         const PDF_MAX_PAGES = 30;   // pages maximum lues par PDF
         const PDF_JS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
         const PDF_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
