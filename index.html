@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>effervescences tactiques</title>
     <link rel="icon" href="logo.ico">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Text:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'ABC Areal';
+            src: url('ABCAreal-Medium.ttf') format('truetype');
+            font-weight: 100 900;
+            font-style: normal;
+            font-display: swap;
+        }
+
         :root {
             --green: #55ff00;
             --shadow: 0 0 12px rgba(0, 0, 0, 0.75);
@@ -21,7 +26,7 @@
         }
 
         body {
-            font-family: 'Stack Sans Text', 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'ABC Areal', 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.3;
             margin: 0;
             padding: 0;
@@ -56,6 +61,7 @@
             padding: 2% 2% 0;
             text-align: center;
             text-shadow: var(--shadow);
+            pointer-events: none;
         }
 
         h1, .name {
@@ -80,6 +86,7 @@
             color: var(--green);
             cursor: pointer;
             text-shadow: inherit;
+            pointer-events: auto;
         }
 
         /* Texte descriptif : juste sous les items 01 / 02 / 03 */
@@ -91,7 +98,8 @@
             width: 90%;
             max-width: 80ch;
             max-height: 34vh;
-            overflow-y: auto;
+            overflow: hidden;
+            pointer-events: none;
             z-index: 1;
             display: none;
             opacity: 0;
@@ -204,7 +212,79 @@
             color: #ffffff;
             text-align: center;
             text-shadow: var(--shadow);
+            pointer-events: none;
         }
+
+        /* ---------- Grille interactive (item 03) ---------- */
+        .grid-bg {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 2px;
+            padding: 1px;
+            width: 100%;
+            height: 100%;
+            background: var(--green);
+            pointer-events: auto;
+        }
+
+        .grid-cell {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 0.5em;
+            background: #0037FF;
+            color: #fff;
+            text-align: center;
+            font-size: clamp(9px, 1.45vh, 15px);
+            line-height: 1.25;
+        }
+
+        .grid-cell.active { cursor: pointer; }
+
+        .cell-label {
+            white-space: pre-line;
+            transition: opacity 0.25s ease;
+        }
+
+        .cell-media {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .cell-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            padding: 0.8em;
+            overflow-y: auto;
+            background: #0037FF;
+            text-align: left;
+            font-size: 0.9em;
+            line-height: 1.35;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            scrollbar-width: none;
+        }
+
+        .cell-text::-webkit-scrollbar { display: none; }
+        .cell-text span { margin: auto 0; }
+
+        .grid-cell.show .cell-media,
+        .grid-cell.show .cell-text { opacity: 1; }
+
+        .grid-cell.show .cell-text { pointer-events: auto; }
+
+        .grid-cell.show.has-media .cell-label,
+        .grid-cell.show.has-text .cell-label { opacity: 0; }
 
         @media (max-width: 600px) {
             h1, .name, #toggleInfo { font-size: 36px; }
@@ -252,8 +332,26 @@
                 ]
             },
             { src: 'v02.webm', text: 'Archive des portraits des théoricien·nes ou experts dans la matière liée aux documents d’identité important·es pour ma recherche.' },
-            { src: '03.mp4', text: 'Résultats d’un processus collectif de transmission et d’interprétation. À travers le passage entre le texte, les mots, le dessin et la voix, chaque participant transforme ce qu’il reçoit selon sa propre perception.' }
-        
+            { grid: true, text: 'Résultats d’un processus collectif de transmission et d’interprétation. À travers le passage entre le texte, les mots, le dessin et la voix, chaque participant transforme ce qu’il reçoit selon sa propre perception.' }
+        ];
+        /* Grille de l'item 03 : 8 colonnes x 6 lignes.
+           r = ligne (1-6), c = colonne (1-8).
+           Au survol : "image" (chemin du fichier) et/ou "text" s'affichent dans la case.
+           Les cases qui ne sont pas dans cette liste restent vides et non interactives. */
+        const GRID_CELLS = [
+            { r: 1, c: 1, label: 'Départ.00\nréference',        text: 'Texte provisoire — référence de départ.' },
+            { r: 1, c: 2, label: 'David.01\ndescription',       text: 'Texte provisoire — description David.01.' },
+            { r: 1, c: 3, label: 'David.01\nreprésentation',    image: 'grid/david-01.jpg' },
+            { r: 2, c: 3, label: 'Valentine.02\ndescription',   text: 'Texte provisoire — description Valentine.02.' },
+            { r: 2, c: 4, label: 'Valentine.02\nreprésentation', image: 'grid/valentine-02.jpg' },
+            { r: 3, c: 4, label: 'Claire.02\ndescription',      text: 'Texte provisoire — description Claire.02.' },
+            { r: 3, c: 5, label: 'Claire.03\nreprésentation',   image: 'grid/claire-03.jpg' },
+            { r: 4, c: 5, label: 'Clément.04\ndescription',     text: 'Texte provisoire — description Clément.04.' },
+            { r: 4, c: 6, label: 'Clément.04\nreprésentation',  image: 'grid/clement-04.jpg' },
+            { r: 5, c: 6, label: 'Declan.05\ndescription',      text: 'Texte provisoire — description Declan.05.' },
+            { r: 5, c: 7, label: 'Declan.05\nreprésentation',   image: 'grid/declan-05.jpg' },
+            { r: 6, c: 7, label: 'Saul.06\ndescription',        text: 'Texte provisoire — description Saul.06.' },
+            { r: 6, c: 8, label: 'Saul.06\nreprésentation',     image: 'grid/saul-06.jpg' }
         ];
         const TICKER_SPEED = 100;     // pixels par seconde
         const TICKER_PAUSE = 7000;    // ms d'attente avant de relancer une ligne
@@ -330,8 +428,64 @@
             });
         }
 
+        function showGridBackground() {
+            const grid = document.createElement('div');
+            grid.className = 'grid-bg';
+            const byPos = new Map(GRID_CELLS.map(d => [`${d.r}-${d.c}`, d]));
+
+            for (let r = 1; r <= 6; r++) {
+                for (let c = 1; c <= 8; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    const data = byPos.get(`${r}-${c}`);
+
+                    if (data) {
+                        cell.classList.add('active');
+
+                        const label = document.createElement('span');
+                        label.className = 'cell-label';
+                        label.textContent = data.label;
+                        cell.appendChild(label);
+
+                        if (data.image) {
+                            const img = document.createElement('img');
+                            img.className = 'cell-media';
+                            img.alt = '';
+                            img.onload = () => cell.classList.add('has-media');
+                            img.onerror = () => img.remove();   // fichier absent : la case reste telle quelle
+                            img.src = data.image;
+                            cell.appendChild(img);
+                        }
+                        if (data.text) {
+                            const box = document.createElement('div');
+                            box.className = 'cell-text';
+                            const t = document.createElement('span');
+                            t.textContent = data.text;
+                            box.appendChild(t);
+                            cell.appendChild(box);
+                            cell.classList.add('has-text');
+                        }
+
+                        cell.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') cell.classList.add('show'); });
+                        cell.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') cell.classList.remove('show'); });
+                        // ecrans tactiles (pas de survol) : un tap affiche / masque
+                        cell.addEventListener('click', () => {
+                            if (window.matchMedia('(hover: none)').matches) cell.classList.toggle('show');
+                        });
+                    }
+                    grid.appendChild(cell);
+                }
+            }
+            bg.replaceChildren(grid);
+            bg.classList.add('on');
+        }
+
         function showBackground(item) {
             stopPdf();
+            if (item.grid) {
+                showGridBackground();
+                return;
+            }
             if (item.pdfs) {
                 bg.classList.add('on');
                 showPdfBackground(item.pdfs);
